@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version     = MuchTimeout::VERSION
   gem.authors     = ["Kelly Redding", "Collin Redding"]
   gem.email       = ["kelly@kellyredding.com", "collin.redding@me.com"]
-  gem.summary     = "IO.select based timeouts"
-  gem.description = "IO.select based timeouts"
+  gem.summary     = "IO.select based timeouts; an alternative to Ruby's stdlib Timeout module."
+  gem.description = "IO.select based timeouts; an alternative to Ruby's stdlib Timeout module."
   gem.homepage    = "http://github.com/redding/much-timeout"
   gem.license     = 'MIT'
 
