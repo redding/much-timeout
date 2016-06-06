@@ -17,5 +17,3 @@ if !(a = Array.new).respond_to?(:sample) && a.respond_to?(:choice)
     alias_method :sample, :choice
   end
 end
-
-# TODO: put test helpers here...
