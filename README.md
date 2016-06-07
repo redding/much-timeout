@@ -4,6 +4,8 @@ IO.select based timeouts.  This is an alternative to the stdlib's Timeout module
 
 ## Usage
 
+### `timeout`
+
 ```ruby
 require 'much-timeout'
 
