@@ -17,7 +17,7 @@ MuchTimeout.timeout(5) do
 end
 ```
 
-MuchTimeout, in its basic form, is a replacement for Timeout.  The main difference is that `IO.select` on an internal pipe is the mechanism for detecting the timeout.  Another difference is that the block is executed in a separate thread while the select/monitoring occurs in the main thread.
+MuchTimeout, in its basic form, is a replacement for Timeout.  The main difference is that `IO.select` on an internal pipe is the mechanism for detecting the timeout.
 
 **Note**: like Timeout, **`Thread#raise` is used to interrupt the block**.  This technique is [widely](http://blog.headius.com/2008/02/ruby-threadraise-threadkill-timeoutrb.html) [considered](http://www.mikeperham.com/2015/05/08/timeout-rubys-most-dangerous-api/) to be [dangerous](http://jvns.ca/blog/2015/11/27/why-rubys-timeout-is-dangerous-and-thread-dot-raise-is-terrifying/).  Be aware and use responsibly.
 

@@ -19,20 +19,18 @@ module MuchTimeout
     reader, writer  = IO.pipe
 
     begin
-      block_thread ||= Thread.new do
-        begin
-          block.call
-        ensure
-          writer.write_nonblock(PIPE_SIGNAL) rescue false
+      main_thread = Thread.current
+      io_select_thread ||= Thread.new do
+        if !::IO.select([reader], nil, nil, seconds)
+          main_thread.raise exception_klass
         end
       end
-      if !!::IO.select([reader], nil, nil, seconds)
-        block_thread.join
-      else
-        block_thread.raise exception_klass
-        block_thread.join
+      begin
+        block.call
+      ensure
+        writer.write_nonblock(PIPE_SIGNAL) rescue false
+        io_select_thread.join
       end
-      block_thread.value
     ensure
       reader.close rescue false
       writer.close rescue false
