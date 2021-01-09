@@ -1,8 +1,9 @@
-require 'assert'
-require 'much-timeout'
+# frozen_string_literal: true
+
+require "assert"
+require "much-timeout"
 
 module MuchTimeout
-
   class UnitTests < Assert::Context
     desc "MuchTimeout"
     setup do
@@ -18,9 +19,8 @@ module MuchTimeout
     end
 
     should "know its pipe signal" do
-      assert_equal '.', subject::PIPE_SIGNAL
+      assert_equal ".", subject::PIPE_SIGNAL
     end
-
   end
 
   class TimeoutSetupTests < UnitTests
@@ -34,7 +34,6 @@ module MuchTimeout
     teardown do
       @cond_var.broadcast
     end
-
   end
 
   class TimeoutTests < TimeoutSetupTests
@@ -48,7 +47,8 @@ module MuchTimeout
       end
     end
 
-    should "interrupt and raise if a custom exception is given and block times out" do
+    should "interrupt and raise if a custom exception is given and block "\
+           "times out" do
       assert_raises(@exception) do
         subject.timeout(@seconds, @exception) do
           @mutex.synchronize{ @cond_var.wait(@mutex) }
@@ -56,7 +56,8 @@ module MuchTimeout
       end
     end
 
-    should "not interrupt and return the block's return value if there is no timeout" do
+    should "not interrupt and return the block's return value if there "\
+           "is no timeout" do
       val = nil
       assert_nothing_raised do
         val = subject.timeout(@seconds){ @return_val }
@@ -72,16 +73,15 @@ module MuchTimeout
 
     should "complain if given a nil seconds value" do
       assert_raises(ArgumentError) do
-        subject.timeout(nil){ }
+        subject.timeout(nil){}
       end
     end
 
     should "complain if given a non-numeric seconds value" do
       assert_raises(ArgumentError) do
-        subject.timeout(Factory.string){ }
+        subject.timeout(Factory.string){}
       end
     end
-
   end
 
   class OptionalTimeoutTests < TimeoutSetupTests
@@ -113,14 +113,18 @@ module MuchTimeout
       end
 
       assert_raises(ArgumentError) do
-        subject.optional_timeout(Factory.string){ }
+        subject.optional_timeout(Factory.string){}
       end
     end
 
     should "call the given block directly if seconds is nil" do
       val = nil
       assert_nothing_raised do
-        val = subject.optional_timeout(nil){ sleep @seconds; @return_val }
+        val =
+          subject.optional_timeout(nil) do
+            sleep @seconds
+            @return_val
+          end
       end
       assert_equal @return_val, val
 
@@ -128,7 +132,6 @@ module MuchTimeout
         subject.optional_timeout(nil){ raise @exception }
       end
     end
-
   end
 
   class JustTimeoutTests < TimeoutSetupTests
@@ -141,29 +144,29 @@ module MuchTimeout
       # this repeats the relevent tests from the TimeoutTests above
 
       assert_nothing_raised do
-        subject.just_timeout(@seconds, :do => proc{
+        subject.just_timeout(@seconds, do: proc{
           @mutex.synchronize{ @cond_var.wait(@mutex) }
           @val_set = Factory.string
-        })
+        },)
       end
       assert_nil @val_set
 
       val = nil
       assert_nothing_raised do
-        val = subject.just_timeout(@seconds, :do => proc{ @return_val })
+        val = subject.just_timeout(@seconds, do: proc{ @return_val })
       end
       assert_equal @return_val, val
 
       assert_raises(@exception) do
-        subject.just_timeout(@seconds, :do => proc{ raise @exception })
+        subject.just_timeout(@seconds, do: proc{ raise @exception })
       end
 
       assert_raises(ArgumentError) do
-        subject.just_timeout(nil, :do => proc{ })
+        subject.just_timeout(nil, do: proc{})
       end
 
       assert_raises(ArgumentError) do
-        subject.just_timeout(Factory.string, :do => proc{ })
+        subject.just_timeout(Factory.string, do: proc{})
       end
     end
 
@@ -171,20 +174,20 @@ module MuchTimeout
       exp = Factory.string
       assert_nothing_raised do
         subject.just_timeout(@seconds, {
-          :do => proc{
+          do: proc{
             @mutex.synchronize{ @cond_var.wait(@mutex) }
           },
-          :on_timeout => proc{ @val_set = exp }
-        })
+          on_timeout: proc{ @val_set = exp },
+        },)
       end
       assert_equal exp, @val_set
 
       @val_set = val = nil
       assert_nothing_raised do
         val = subject.just_timeout(@seconds, {
-          :do         => proc{ @return_val },
-          :on_timeout => proc{ @val_set = exp }
-        })
+          do: proc{ @return_val },
+          on_timeout: proc{ @val_set = exp },
+        },)
       end
       assert_equal @return_val, val
       assert_nil @val_set
@@ -192,28 +195,27 @@ module MuchTimeout
 
     should "complain if not given a :do arg" do
       assert_raises(ArgumentError) do
-        subject.just_timeout(@seconds){ }
+        subject.just_timeout(@seconds){}
       end
       assert_raises(ArgumentError) do
-        subject.just_timeout(@seconds, :do => nil)
+        subject.just_timeout(@seconds, do: nil)
       end
     end
 
     should "complain if given a non-proc :do arg" do
       assert_raises(ArgumentError) do
-        subject.just_timeout(@seconds, :do => Factory.string)
+        subject.just_timeout(@seconds, do: Factory.string)
       end
     end
 
     should "complain if given a non-proc :on_timeout arg" do
       assert_raises(ArgumentError) do
         subject.just_timeout(@seconds, {
-          :do         => proc{ },
-          :on_timeout => Factory.string
-        })
+          do: proc{},
+          on_timeout: Factory.string,
+        },)
       end
     end
-
   end
 
   class JustOptionalTimeoutTests < TimeoutSetupTests
@@ -226,97 +228,99 @@ module MuchTimeout
       # this repeats the relevent tests from the JustTimeoutTests above
 
       assert_nothing_raised do
-        subject.just_optional_timeout(@seconds, :do => proc{
+        subject.just_optional_timeout(@seconds, do: proc{
           @mutex.synchronize{ @cond_var.wait(@mutex) }
           @val_set = Factory.string
-        })
+        },)
       end
       assert_nil @val_set
 
       val = nil
       assert_nothing_raised do
-        val = subject.just_optional_timeout(@seconds, :do => proc{ @return_val })
+        val =
+          subject.just_optional_timeout(@seconds, do: proc{ @return_val })
       end
       assert_equal @return_val, val
 
       assert_raises(@exception) do
-        subject.just_optional_timeout(@seconds, :do => proc{ raise @exception })
+        subject.just_optional_timeout(@seconds, do: proc{ raise @exception })
       end
 
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout(Factory.string, :do => proc{ })
+        subject.just_optional_timeout(Factory.string, do: proc{})
       end
 
       exp = Factory.string
       assert_nothing_raised do
         subject.just_optional_timeout(@seconds, {
-          :do => proc{
+          do: proc{
             @mutex.synchronize{ @cond_var.wait(@mutex) }
           },
-          :on_timeout => proc{ @val_set = exp }
-        })
+          on_timeout: proc{ @val_set = exp },
+        },)
       end
       assert_equal exp, @val_set
 
       @val_set = val = nil
       assert_nothing_raised do
         val = subject.just_optional_timeout(@seconds, {
-          :do         => proc{ @return_val },
-          :on_timeout => proc{ @val_set = exp }
-        })
+          do: proc{ @return_val },
+          on_timeout: proc{ @val_set = exp },
+        },)
       end
       assert_equal @return_val, val
       assert_nil @val_set
 
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout(@seconds){ }
+        subject.just_optional_timeout(@seconds){}
       end
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout(@seconds, :do => nil)
+        subject.just_optional_timeout(@seconds, do: nil)
       end
 
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout(@seconds, :do => Factory.string)
+        subject.just_optional_timeout(@seconds, do: Factory.string)
       end
 
       assert_raises(ArgumentError) do
         subject.just_optional_timeout(@seconds, {
-          :do         => proc{ },
-          :on_timeout => Factory.string
-        })
+          do: proc{},
+          on_timeout: Factory.string,
+        },)
       end
     end
 
     should "call the given :do arg directly if seconds is nil" do
       val = nil
       assert_nothing_raised do
-        val = subject.just_optional_timeout(nil, :do => proc{
+        val = subject.just_optional_timeout(nil, do: proc{
           sleep @seconds
           @return_val
-        })
+        },)
       end
       assert_equal @return_val, val
 
       assert_raises(@exception) do
-        subject.just_optional_timeout(nil, :do => proc{ raise @exception })
+        subject.just_optional_timeout(nil, do: proc{ raise @exception })
       end
     end
 
     should "complain if not given a :do arg" do
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout([@seconds, nil].sample){ }
+        subject.just_optional_timeout([@seconds, nil].sample){}
       end
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout([@seconds, nil].sample, :do => nil)
+        subject.just_optional_timeout([@seconds, nil].sample, do: nil)
       end
     end
 
     should "complain if given a non-proc :do arg" do
       assert_raises(ArgumentError) do
-        subject.just_optional_timeout([@seconds, nil].sample, :do => Factory.string)
+        subject.just_optional_timeout(
+          [@seconds, nil].sample,
+          do: Factory.string,
+        )
       end
     end
-
   end
-
 end
